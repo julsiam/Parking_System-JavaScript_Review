@@ -35,7 +35,8 @@ rl.on('line', (line) => {
                 let strEntrance = parking.ENTRANCE.map((e) => e.name).join('\n')
                 rl.question(`--------------------------------------\nEntry Points to the Parking Complex\n--------------------------------------\n${strEntrance}\n\nChoose Entry Point: `, function (entrance) {
                     parking.park(v, entrance)
-                    console.log("Your car is succesfully parked!");
+                    console.log("\nYour car is succesfully parked! Check the map for the location of your vehicle. \n")
+                    parking.viewMap()
 
                     rl.prompt()
                 })
@@ -46,14 +47,16 @@ rl.on('line', (line) => {
         case 'U':
         case 'u':
             console.log("\nYou are about to unpark your car!");
-            rl.question('Location of your vehicle to unpark. Seperate by a space [row column]: ', function (location) {
+            console.log('Check the map for the location of your vehicle.\n'), 
+            parking.viewMap()
+            rl.question('Input must be row column separated with space. Vehicle Location: ', function (location) {
                 let strLoc = location.trim().split(' ')
 
                 if (strLoc.length >= 2) {
                     let row = strLoc[0]
                     let col = strLoc[1]
                     parking.unpark(row, col)
-                    console.log('Vehicle Unparked!')
+                    console.log('Vehicle Unparked! Drive Safely!')
 
                     rl.prompt()
                 } else {
@@ -77,7 +80,7 @@ rl.on('line', (line) => {
 
 }).on('close', () => {
 
-    console.log('Thank you for coming!');
+    console.log('Drive Safely! The life you save might be yours!');
     process.exit(0);
 
 });

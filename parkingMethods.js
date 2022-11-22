@@ -18,8 +18,6 @@ export class ParkingMethods {
             { name: 'B', row: 0, col: 6 },
             { name: 'C', row: this.MAX_ROWS, col: 3 }
         ]
-
-
     }
 
     //
@@ -69,12 +67,11 @@ export class ParkingMethods {
                 },
                 row: nrow,
                 col: ncol,
-                start: new Date()
+                Start_of_Parking: new Date()
             })
-
+            
             return this.PARK[nrow][ncol]
         }
-
     }
 
     getVehicleDesc(size) {
@@ -99,14 +96,14 @@ export class ParkingMethods {
     unpark(row, col) {
 
         let p = this.PARK[row][col]
-        let diff = (new Date()) - p.start
+        let diff = (new Date()) - p.Start_of_Parking
         let totalPayable = this.compute(p.Parking_Slot_Size.Value, diff)
-        console.log(`Your Total Parking Charges: ₱ ${totalPayable}`)
+        console.log(`Your Total Parking Charges: ₱ ${totalPayable}\n`)
         // Reset parking slot
         Object.assign(this.PARK[row][col], {
             Occupied: false,
             Vehicle_Size: null,
-            start: null
+            Start_of_Parking: null
         })
     }
 
