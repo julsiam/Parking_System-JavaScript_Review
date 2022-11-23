@@ -6,13 +6,12 @@ export class ParkingMethods {
         this.MAX_COLS = 8
         this.MAX_ROWS = 5
 
-        // Initialize our parking slots
+        //can't modify the fill() part
         this.PARK = new Array(this.MAX_ROWS).fill().map(() => new Array(this.MAX_COLS).fill())
 
-        // Initialize our parking spaces with random data
         this.initSpaces()
 
-        // Let's define our entrance points
+        //parking slot entry points
         this.ENTRANCE = [
             { name: 'A', row: 0, col: 2 },
             { name: 'B', row: 0, col: 6 },
@@ -20,7 +19,7 @@ export class ParkingMethods {
         ]
     }
 
-    //
+
     viewMap() {
         console.log(util.inspect(this.PARK, {
             showHidden: false,
@@ -30,19 +29,17 @@ export class ParkingMethods {
         }))
     }
 
-    // Check if parking slot is available
     park(size, ent) {
 
         let entrance = this.ENTRANCE.find(o => o.name === ent.toUpperCase())
         let nrow = -1, ncol = -1
         let distance = 9999
 
-        // Search for the nearest parking space
         for (let i = 0; i < this.MAX_ROWS; i++) {
             for (let j = 0; j < this.MAX_COLS; j++) {
                 if (!this.isGateway(i, j)) {
                     let p = this.PARK[i][j]
-                    if (size <= p.Parking_Slot_Size.Value) { // Check if vehicle fits in parking slot
+                    if (size <= p.Parking_Slot_Size.Value) {
                         let computedDistance = Math.abs(entrance.row - p.row) + Math.abs(entrance.col - p.col)
                         if (distance > computedDistance && !p.Occupied) {
                             distance = computedDistance
@@ -54,8 +51,8 @@ export class ParkingMethods {
             }
         }
 
-        if (nrow == -1) { // No parking slot found
-            console.log('No parking slot found')
+        if (nrow == -1) {
+            console.log('No vacant slot available!')
             return false
         } else {
 
@@ -69,10 +66,17 @@ export class ParkingMethods {
                 col: ncol,
                 Start_of_Parking: new Date()
             })
-            
+
             return this.PARK[nrow][ncol]
         }
     }
+
+    /*
+     Vehicle Value and Description
+    0 - Small SIze Vehicle
+    1 - Medium Size Vehicle
+    2 - Large Size Vehicle 
+    */
 
     getVehicleDesc(size) {
 
@@ -93,13 +97,17 @@ export class ParkingMethods {
 
     }
 
+    getOwner(owner) {
+
+    }
+
     unpark(row, col) {
 
         let p = this.PARK[row][col]
         let diff = (new Date()) - p.Start_of_Parking
         let totalPayable = this.compute(p.Parking_Slot_Size.Value, diff)
-        console.log(`Your Total Parking Charges: ₱ ${totalPayable}\n`)
-        // Reset parking slot
+        console.log(`\t---------------------------------------\n\t  Your Total Parking Charges: ₱ ${totalPayable}\n\t---------------------------------------\n`)
+
         Object.assign(this.PARK[row][col], {
             Occupied: false,
             Vehicle_Size: null,
@@ -107,7 +115,20 @@ export class ParkingMethods {
         })
     }
 
-    // Compute total charges based on parking size and total time parked
+    /*charges computation when parking depending on the vehicle size and the parking slot size
+    
+    -All types of car pay the flat rate of 40 pesos for the first three (3) hours;
+    -The exceeding hourly rate beyond the initial three (3) hours will be charged as follows:
+    
+          - 20/hour for vehicles parked in SP;
+          - 60/hour for vehicles parked in MP; and
+          - 100/hour for vehicles parked in LP
+
+    
+     For parking that exceeds 24 hours, every full 24 hour chunk is charged 5,000 pesos regardless of parking slot.
+    
+     */
+
     compute(size, totalTime) {
 
         let remainingTime = totalTime
@@ -125,29 +146,22 @@ export class ParkingMethods {
             hourlyCharge = 100
         }
 
-        // For parking that exceeds 24 hours, every full 24 hour chunk is charged 5,000 pesos regardless of parking slot.
         if (remainingTime > t24) {
             let n24 = parseInt(totalTime / t24)
             charges += n24 * 5000
             remainingTime -= (n24 * t24)
         }
 
-        // First 3 hours has a flat rate of 40
         if (remainingTime > (t1h * 3)) {
             remainingTime -= (t1h * 3)
             charges += 40
         }
 
-        // The exceeding hourly rate beyond the initial three (3) hours will be charged as follows:
-        // - 20/hour for vehicles parked in SP;
-        // - 60/hour for vehicles parked in MP; and
-        // - 100/hour for vehicles parked in LP
         if (remainingTime > 0) {
             let remainingHours = Math.ceil(remainingTime / t1h)
             charges += remainingHours * hourlyCharge
         }
 
-        // return total charges
         return charges
 
     }
@@ -190,7 +204,6 @@ export class ParkingMethods {
     }
 
     getRandomSize() {
-        // SP = 0, MP = 1, LP = 2
         const max = 2
         const min = 0
         const descriptors = ['Small-size Parking Slot', 'Medium-sized Parking Slot', 'Large-size Parking Slot']
